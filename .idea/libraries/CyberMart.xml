@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="CyberMart">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/dist/CyberMart.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
