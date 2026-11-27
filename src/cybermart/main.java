@@ -43,7 +43,7 @@ public class main extends Application {
         } catch (SQLException e) {
             e.getCause();
         }
-        FXMLLoader fxmlLoader = new FXMLLoader(new File("C:/Users/StudentKarenAmumpair/Downloads/CyberMart-master/CyberMart-master/src/views/homepage.fxml").toURI().toURL());
+        FXMLLoader fxmlLoader = new FXMLLoader(main.class.getResource("/views/homepage.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
         stage.setTitle("Cyber Mart");
        // stage.setScene(scene);

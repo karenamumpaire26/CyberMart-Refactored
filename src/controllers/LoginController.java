@@ -27,18 +27,14 @@ import java.util.logging.Logger;
 import javafx.scene.Node;
 import java.sql.PreparedStatement;
 
-
-
-
-
 /**
  * FXML Controller class
  *
  * @author majid
  */
-
 public class LoginController implements Initializable {
-        @FXML
+
+    @FXML
     private JFXButton loginButton;
 
     @FXML
@@ -49,24 +45,26 @@ public class LoginController implements Initializable {
 
     @FXML
     private TextField usernameField;
+
     @FXML
     private AnchorPane LoginPane;
+
     @FXML
     private Stage stage;
+
     private Scene scene;
     private Parent root;
+
     @FXML
     private Label LoginMsgLabel;
 
-   
-    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        
-        signupButton.setOnMouseClicked(event->{
+
+        signupButton.setOnMouseClicked(event -> {
             try {
-                root = FXMLLoader.load(getClass().getResource("signup.fxml"));
-                stage = (Stage)((Node)event.getSource()).getScene().getWindow();
+                root = FXMLLoader.load(getClass().getResource("/views/signup.fxml"));
+                stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                 scene = new Scene(root);
                 stage.setScene(scene);
                 stage.setTitle("Signup Page");
@@ -75,29 +73,23 @@ public class LoginController implements Initializable {
             } catch (IOException ex) {
                 Logger.getLogger(LoginController.class.getName()).log(Level.SEVERE, null, ex);
             }
-        
         });
-        
-        loginButton.setOnMouseClicked(event-> {
-                
-         if (usernameField.getText().isBlank() == false && passwordField.getText().isBlank() == false) {
 
-            validateLogin();
-
-        } else {
-            LoginMsgLabel.setText("Please enter Username & Password");
-        }
-                
-                
-                });
-
+        loginButton.setOnMouseClicked(event -> {
+            if (usernameField.getText().isBlank() == false && passwordField.getText().isBlank() == false) {
+                validateLogin();
+            } else {
+                LoginMsgLabel.setText("Please enter Username & Password");
+            }
+        });
     }
+
     public void validateLogin() {
 
         Connection connectDB = DatabaseConnection.getInstance().getConnection();
 
-
-        String verifyLogin = "SELECT customer_id, count(1) FROM customer_info WHERE d_username=? AND d_password=?";
+        // Fixed SQL query to work with newer MySQL versions
+        String verifyLogin = "SELECT count(1) FROM customer_info WHERE d_username=? AND d_password=?";
 
         try {
             PreparedStatement pstmt = connectDB.prepareStatement(verifyLogin);
@@ -106,10 +98,21 @@ public class LoginController implements Initializable {
             ResultSet queryResult = pstmt.executeQuery();
 
             while (queryResult.next()) {
-                if (queryResult.getInt(2) == 1) { // If user is found
+                // Changed index to 1 because we only select count(1) now
+                if (queryResult.getInt(1) == 1) {
                     LoginMsgLabel.setText("Welcome to Cyber Mart family");
 
-                    int cus_id = queryResult.getInt(1); // Get customer ID
+                    // Get the customer ID properly
+                    int cus_id = 0;
+                    String getIdQuery = "SELECT customer_id FROM customer_info WHERE d_username=? AND d_password=?";
+                    PreparedStatement getIdStmt = connectDB.prepareStatement(getIdQuery);
+                    getIdStmt.setString(1, usernameField.getText());
+                    getIdStmt.setString(2, passwordField.getText());
+                    ResultSet idResult = getIdStmt.executeQuery();
+                    if (idResult.next()) {
+                        cus_id = idResult.getInt("customer_id");
+                    }
+
                     String loggedinName = usernameField.getText();
 
                     // Update the current session user (c_user table)
@@ -120,7 +123,7 @@ public class LoginController implements Initializable {
                     updateStmt.executeUpdate();
 
                     // Load the next screen
-                    FXMLLoader fxmlloader = new FXMLLoader(getClass().getResource("homepage.fxml"));
+                    FXMLLoader fxmlloader = new FXMLLoader(getClass().getResource("/views/homepage.fxml"));
                     try {
                         Parent root = fxmlloader.load();
                     } catch (IOException ex) {
@@ -139,7 +142,4 @@ public class LoginController implements Initializable {
             e.printStackTrace();
         }
     }
-
-
-
 }
